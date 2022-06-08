@@ -15,17 +15,10 @@ MClient* client;
 
 void setup () {
   Serial.begin(115200);
-
-  pinMode(wifiLed, OUTPUT);
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(wifiLed, HIGH);
-  digitalWrite(ledPin, HIGH);
   
-  
-  // Connect to Wi-Fi
   wifiConnect();
 
-  client = new MClient;
+  client = new MClient("192.168.137.1", 8080);
 }
  
 void loop() {  
