@@ -4,23 +4,26 @@
 
 class MClient {
   private:
+    static MClient* client = nullptr;
+
     WebSocketsClient webSocket;
     const char *id;
     bool connected = false;
 
-    void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
+    static void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
+    MClient* client = MClient::client;
  
     switch(type) {
       case WStype_DISCONNECTED:
         Serial.printf("Disconnected!\n");
-        this->connected = false;
+        client->connected = false;
         break;
 
       case WStype_CONNECTED: {
         Serial.printf("Connected to url: %s\n", payload);
 
-        this->webSocket.sendTXT((String("{'type': 'identifier', 'id': '") + String(id) + String("'}")).c_str());
-        this->connected = true;
+        client->webSocket.sendTXT((String("{'type': 'identifier', 'id': '") + String(id) + String("'}")).c_str());
+        client->connected = true;
         break;
 
       case WStype_TEXT:
@@ -41,10 +44,16 @@ class MClient {
 }
 
   public:
-    MClient(const char *url, uint16_t port, const char *id) {
-      this->id = id;
+    MClient* create(const char *url, uint16_t port, const char *id) {
+      if(this->client != nullptr) return this->client;
 
-      webSocket.begin(url, port);
+      this->client = new MClient;
+      client->id = id;
+
+      client->webSocket.begin(url, port);
+      client->webSocket.onEvent(webSocketEvent);
+
+      return this->client;
     }
 
     void loop(){

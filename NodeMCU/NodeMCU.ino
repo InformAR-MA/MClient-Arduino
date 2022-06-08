@@ -18,7 +18,7 @@ void setup () {
   
   wifiConnect();
 
-  client = new MClient("192.168.137.1", 8080);
+  client = new MClient("192.168.137.1", 8080, "NodeMCU");
 }
  
 void loop() {  
