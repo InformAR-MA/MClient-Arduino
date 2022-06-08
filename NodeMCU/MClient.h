@@ -1,29 +1,28 @@
 #ifndef MClIENT_H
 #define MCLIENT_H
 
-
 class MClient {
   private:
-    static MClient* client = nullptr;
 
     WebSocketsClient webSocket;
     const char *id;
     bool connected = false;
 
     static void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
-    MClient* client = MClient::client;
+
+    MClient* instance = MClient::instance;
  
     switch(type) {
       case WStype_DISCONNECTED:
         Serial.printf("Disconnected!\n");
-        client->connected = false;
+        instance->connected = false;
         break;
 
       case WStype_CONNECTED: {
         Serial.printf("Connected to url: %s\n", payload);
 
-        client->webSocket.sendTXT((String("{'type': 'identifier', 'id': '") + String(id) + String("'}")).c_str());
-        client->connected = true;
+        instance->webSocket.sendTXT((String("{'type': 'identifier', 'id': '") + String(instance->id) + String("'}")).c_str());
+        instance->connected = true;
         break;
 
       case WStype_TEXT:
@@ -44,22 +43,22 @@ class MClient {
 }
 
   public:
-    MClient* create(const char *url, uint16_t port, const char *id) {
-      if(this->client != nullptr) return this->client;
+    static MClient* instance;
 
-      this->client = new MClient;
-      client->id = id;
+    MClient(const char *url, uint16_t port, const char *id) {
+      this->instance = this;
 
-      client->webSocket.begin(url, port);
-      client->webSocket.onEvent(webSocketEvent);
+      this->id = id;
 
-      return this->client;
+      this->webSocket.begin(url, port);
+      this->webSocket.onEvent(webSocketEvent);
     }
 
     void loop(){
-      webSocket.loop();
+      this->webSocket.loop();
     }
 };
 
+MClient* MClient::instance = nullptr;
 
 #endif
