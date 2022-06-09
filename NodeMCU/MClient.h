@@ -1,9 +1,10 @@
 #ifndef MClIENT_H
 #define MCLIENT_H
 
+//typedef std::function<void(WStype_t type, uint8_t * payload, size_t length)> WebSocketClientEvent;
+
 class MClient {
   private:
-
     WebSocketsClient webSocket;
     const char *id;
     bool connected = false;
@@ -21,7 +22,7 @@ class MClient {
       case WStype_CONNECTED: {
         Serial.printf("Connected to url: %s\n", payload);
 
-        instance->webSocket.sendTXT((String("{'type': 'identifier', 'id': '") + String(instance->id) + String("'}")).c_str());
+        instance->webSocket.sendTXT((String("{\"type\": \"identify\", \"id\": \"") + String(instance->id) + String("\"}")).c_str());
         instance->connected = true;
         break;
 
@@ -30,13 +31,16 @@ class MClient {
         break;
 
       case WStype_BIN:
-      case WStype_PING:
-      case WStype_PONG:
       case WStype_ERROR:
       case WStype_FRAGMENT_TEXT_START:
       case WStype_FRAGMENT_BIN_START:
       case WStype_FRAGMENT:
       case WStype_FRAGMENT_FIN:
+        Serial.printf("Unsupported message received.\n");
+        break;
+
+      case WStype_PING:
+      case WStype_PONG:
         break;
     }
   }
